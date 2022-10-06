@@ -1,0 +1,53 @@
+Ref Paper: Aortic Cellular Diversity and Quantitative Genome-Wide Association Study Trait Prioritization Through Single-Nuclear RNA Sequencing of the Aneurysmal Human Aorta
+Paper link: https://www.ahajournals.org/doi/epdf/10.1161/ATVBAHA.122.317953
+Database: GSE207784
+RNA Selector link: https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=5&WebEnv=MCID_633f1eebabb869748bc03af7&o=acc_s%3Aa&s=SRR20053727,SRR20053731,SRR20053730,SRR20053734,SRR20053739,SRR20053733,SRR20053735,SRR20053728,SRR20053729,SRR20053736,SRR20053732,SRR20053738,SRR20053737
+Step1 : Download metadata from RNA selector and then create the "get_sra_data.sh" with following code:
+  mkdir 0.SRA_file
+  cd 0.SRA_file
+  	#!/bin/bash
+  	VAR=$(tail -n +2 ../SraRunTable.txt|cut -d ',' -f 1)
+  	for i in ${VAR}
+	  	do
+		  	if [ -f ${i}.fastq.gz ]
+			  	then
+				  	echo "${i} already downloaded"
+		  	else
+			  	echo "(o) Downloading SRA entry: ${i}"
+				  fastq-dump --gzip --defline-qual '+' ${i}
+			  	echo "(o) Done downloading ${i}"
+		  	fi
+	  done
+  cd ..
+Step 1: Download the SRA files using ubuntu and change the authority
+    chmod 777 *.gz
+Step 2: First, use the NCBI fastq-dump utility with the --split-files argument to retrieve the FASTQ files. The command may look like this (don't use .fastq.gz, just write the SRA number):
+    mkdir 1.SRA_extract
+    cd 0.SRA_file
+    fastq-dump --split-files --gzip --outdir ../1.SRA_extract SRR20053727
+
+
+test###### single command to download and split file
+mkdir 0.SRA_file
+cd 0.SRA_file
+#!/bin/bash
+VAR=$(tail -n +2 ../SraRunTable.txt|cut -d ',' -f 1)
+for i in ${VAR}
+	do
+		if [ -f ${i}.fastq.gz ]
+			then
+				echo "${i} already downloaded"
+				fastq-dump --split-files --gzip ${i}
+				echo "(o) Done splitting"
+				rm ${i}.fastq.gz
+		else
+			echo "(o) Downloading SRA entry: ${i}"
+			fastq-dump --gzip --defline-qual '+' ${i}
+			echo "(o) Done downloading ${i}"
+			fastq-dump --split-files --gzip ${i}
+			echo "(o) Done splitting"
+			rm ${i}.fastq.gz
+		fi
+	done
+cd ..
+
